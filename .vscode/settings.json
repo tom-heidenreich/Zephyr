@@ -1,0 +1,5 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.jdt.ls.java.home": "/home/tom/.sdkman/candidates/java/current",
+  "java.import.gradle.java.home": "/home/tom/.sdkman/candidates/java/current"
+}
