@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
@@ -129,7 +132,8 @@ fun zephyrDashboard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec),
-                            transformationSpec = transformationSpec,
+                            containerColor = cardContainerColor(isAlt = false),
+                            contentColor = cardContentColor(isAlt = false),
                         )
                     }
                     item {
@@ -140,7 +144,8 @@ fun zephyrDashboard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec),
-                            transformationSpec = transformationSpec,
+                            containerColor = cardContainerColor(isAlt = true),
+                            contentColor = cardContentColor(isAlt = true),
                         )
                     }
                     item {
@@ -151,7 +156,8 @@ fun zephyrDashboard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec),
-                            transformationSpec = transformationSpec,
+                            containerColor = cardContainerColor(isAlt = false),
+                            contentColor = cardContentColor(isAlt = false),
                         )
                     }
                     item {
@@ -162,7 +168,8 @@ fun zephyrDashboard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec),
-                            transformationSpec = transformationSpec,
+                            containerColor = cardContainerColor(isAlt = true),
+                            contentColor = cardContentColor(isAlt = true),
                         )
                     }
                     item {
@@ -173,7 +180,8 @@ fun zephyrDashboard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec),
-                            transformationSpec = transformationSpec,
+                            containerColor = cardContainerColor(isAlt = false),
+                            contentColor = cardContentColor(isAlt = false),
                         )
                     }
                 }
@@ -187,14 +195,21 @@ private fun heroCard(
     title: String,
     subtitle: String,
     modifier: Modifier,
-    transformationSpec: androidx.wear.compose.material3.lazy.TransformationSpec,
+    containerColor: Color,
+    contentColor: Color,
 ) {
+    val cardShape = RoundedCornerShape(18.dp)
     Card(
         onClick = { },
-        modifier = modifier,
+        modifier = modifier.border(
+            width = 1.dp,
+            color = Color(0x33000000),
+            shape = cardShape,
+        ),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = containerColor,
+            contentColor = contentColor,
         ),
     ) {
         Column(
@@ -213,11 +228,22 @@ private fun metricCard(
     primary: String,
     secondary: String,
     modifier: Modifier,
-    transformationSpec: androidx.wear.compose.material3.lazy.TransformationSpec,
+    containerColor: Color,
+    contentColor: Color,
 ) {
+    val cardShape = RoundedCornerShape(18.dp)
     Card(
         onClick = { },
-        modifier = modifier,
+        modifier = modifier.border(
+            width = 1.dp,
+            color = Color(0x33000000),
+            shape = cardShape,
+        ),
+        shape = cardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -274,6 +300,24 @@ private fun speedSummary(metrics: LiveMetrics): String {
 
 private fun performanceSummary(metrics: LiveMetrics): String {
     return metrics.heartRateBpm?.let { "Heart rate ${"%.0f".format(it)} bpm" } ?: "Heart rate unavailable"
+}
+
+@Composable
+private fun cardContainerColor(isAlt: Boolean): Color {
+    return if (isAlt) {
+        Color(0xFF2B2F34)
+    } else {
+        Color(0xFF23272C)
+    }
+}
+
+@Composable
+private fun cardContentColor(isAlt: Boolean): Color {
+    return if (isAlt) {
+        Color(0xFFF0F1F2)
+    } else {
+        Color(0xFFF6F7F8)
+    }
 }
 
 private fun String.prettyLabel(): String {
