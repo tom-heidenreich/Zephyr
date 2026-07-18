@@ -1,5 +1,8 @@
 # Zephyr
 
+![Mobile tests](https://github.com/tom-heidenreich/Zephyr/actions/workflows/mobile-tests.yml/badge.svg)
+![Wear tests](https://github.com/tom-heidenreich/Zephyr/actions/workflows/wear-tests.yml/badge.svg)
+
 Zephyr is a sailing and windsurfing companion app built around a Wear OS watch experience. It helps a rider track an active session, derive sailing metrics from live data, and surface compact status views on the watch, tile, and complication.
 
 The app is designed for fast, glanceable use on the water:
@@ -43,6 +46,11 @@ wear/
 
 - Wear app: `./gradlew :wear:compileDebugKotlin`
 - Mobile app: standard Android application module under `mobile/`
+
+## Continuous Integration
+
+- Mobile tests run via GitHub Actions on pushes and pull requests for the mobile module.
+- Wear tests run via GitHub Actions on pushes and pull requests for the wear module.
 
 ## Domain Focus
 
