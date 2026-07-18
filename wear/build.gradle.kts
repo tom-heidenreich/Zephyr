@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.wear.tooling.preview)
     implementation(libs.compose.ui.tooling)
     implementation(libs.guava)
+    implementation(libs.androidx.health.services.client)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.play.services.wearable)

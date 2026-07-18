@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface LiveMetricsDataSource {
     fun observeLiveMetrics(): Flow<LiveMetrics>
+
+    suspend fun clearMetrics()
 }

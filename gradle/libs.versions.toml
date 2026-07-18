@@ -26,6 +26,7 @@ tilesTooling = "1.5.0"
 tilesToolingPreview = "1.5.0"
 watchfaceComplicationsDataSourceKtx = "1.2.1"
 kotlinxCoroutines = "1.10.2"
+healthServicesClient = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,7 @@ androidx-tiles-tooling-preview = { group = "androidx.wear.tiles", name = "tiles-
 androidx-watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+androidx-health-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "healthServicesClient" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
