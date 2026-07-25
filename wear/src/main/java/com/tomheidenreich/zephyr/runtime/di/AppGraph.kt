@@ -2,15 +2,15 @@ package com.tomheidenreich.zephyr.runtime.di
 
 import android.content.Context
 import com.tomheidenreich.zephyr.data.repository.fake.FakeExerciseSessionRepository
-import com.tomheidenreich.zephyr.data.repository.fake.FakeLiveMetricsRepository
+import com.tomheidenreich.zephyr.data.repository.fake.FakeTelemetryRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeSurfaceSnapshotRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeUserPreferencesRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeWindRepository
 import com.tomheidenreich.zephyr.data.repository.health.HealthServicesExerciseSessionRepository
-import com.tomheidenreich.zephyr.data.repository.health.HealthServicesLiveMetricsRepository
+import com.tomheidenreich.zephyr.data.repository.health.HealthServicesTelemetryRepository
 import com.tomheidenreich.zephyr.data.source.health.HealthServicesExerciseBridge
 import com.tomheidenreich.zephyr.domain.repository.ExerciseSessionRepository
-import com.tomheidenreich.zephyr.domain.repository.LiveMetricsRepository
+import com.tomheidenreich.zephyr.domain.repository.TelemetryRepository
 import com.tomheidenreich.zephyr.domain.repository.SurfaceSnapshotRepository
 import com.tomheidenreich.zephyr.domain.repository.UserPreferencesRepository
 import com.tomheidenreich.zephyr.domain.repository.WindRepository
@@ -20,7 +20,7 @@ import com.tomheidenreich.zephyr.domain.repository.WindRepository
  */
 object AppGraph {
     private val fakeExerciseSessionRepository = FakeExerciseSessionRepository()
-    private val fakeLiveMetricsRepository = FakeLiveMetricsRepository()
+    private val fakeTelemetryRepository = FakeTelemetryRepository()
     private val fakeWindRepository = FakeWindRepository()
     private val fakeSurfaceSnapshotRepository = FakeSurfaceSnapshotRepository()
     private val fakeUserPreferencesRepository = FakeUserPreferencesRepository()
@@ -36,8 +36,8 @@ object AppGraph {
         HealthServicesExerciseSessionRepository(healthServicesBridge)
     }
 
-    private val healthServicesLiveMetricsRepository: LiveMetricsRepository by lazy {
-        HealthServicesLiveMetricsRepository(healthServicesBridge)
+    private val healthServicesTelemetryRepository: TelemetryRepository by lazy {
+        HealthServicesTelemetryRepository(healthServicesBridge)
     }
 
     fun initialize(context: Context) {
@@ -47,8 +47,8 @@ object AppGraph {
     val exerciseSessionRepository: ExerciseSessionRepository
         get() = if (healthServicesContext == null) fakeExerciseSessionRepository else healthServicesExerciseSessionRepository
 
-    val liveMetricsRepository: LiveMetricsRepository
-        get() = if (healthServicesContext == null) fakeLiveMetricsRepository else healthServicesLiveMetricsRepository
+    val telemetryRepository: TelemetryRepository
+        get() = if (healthServicesContext == null) fakeTelemetryRepository else healthServicesTelemetryRepository
 
     val windRepository: WindRepository = fakeWindRepository
     val surfaceSnapshotRepository: SurfaceSnapshotRepository = fakeSurfaceSnapshotRepository

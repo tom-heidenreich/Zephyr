@@ -1,4 +1,4 @@
-package com.tomheidenreich.zephyr.domain.model
+package com.tomheidenreich.zephyr.domain.wind
 
 import java.time.Instant
 

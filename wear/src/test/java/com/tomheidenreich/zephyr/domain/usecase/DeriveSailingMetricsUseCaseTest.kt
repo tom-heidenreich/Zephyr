@@ -1,11 +1,11 @@
 package com.tomheidenreich.zephyr.domain.usecase
 
-import com.tomheidenreich.zephyr.domain.model.LiveMetrics
-import com.tomheidenreich.zephyr.domain.model.PointOfSail
-import com.tomheidenreich.zephyr.domain.model.WindDataSourceType
-import com.tomheidenreich.zephyr.domain.model.WindObservation
-import com.tomheidenreich.zephyr.domain.model.WindReference
-import com.tomheidenreich.zephyr.domain.model.WindSample
+import com.tomheidenreich.zephyr.domain.model.TelemetryReading
+import com.tomheidenreich.zephyr.domain.sailing.PointOfSail
+import com.tomheidenreich.zephyr.domain.wind.WindDataSourceType
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
+import com.tomheidenreich.zephyr.domain.wind.WindReference
+import com.tomheidenreich.zephyr.domain.wind.WindSample
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -17,7 +17,7 @@ class DeriveSailingMetricsUseCaseTest {
 
     @Test
     fun `uses observed true wind when available`() {
-        val input = LiveMetrics(speedMps = 6.0, headingDegrees = 90.0)
+        val input = TelemetryReading(speedMps = 6.0, headingDegrees = 90.0)
         val observedTrue = WindSample(speedKts = 20.0, directionFromDegrees = 270, reference = WindReference.TRUE)
         val observedApparent =
             WindSample(speedKts = 24.0, directionFromDegrees = 250, reference = WindReference.APPARENT)
@@ -40,7 +40,7 @@ class DeriveSailingMetricsUseCaseTest {
 
     @Test
     fun `derives true wind from apparent wind and boat motion`() {
-        val input = LiveMetrics(speedMps = 5.0, headingDegrees = 45.0)
+        val input = TelemetryReading(speedMps = 5.0, headingDegrees = 45.0)
         val observation = WindObservation(
             spotId = "spot-b",
             observedAt = Instant.parse("2026-01-01T00:00:00Z"),
@@ -61,7 +61,7 @@ class DeriveSailingMetricsUseCaseTest {
 
     @Test
     fun `computes exact angle and close hauled classification at threshold`() {
-        val input = LiveMetrics(speedMps = 6.0, headingDegrees = 0.0)
+        val input = TelemetryReading(speedMps = 6.0, headingDegrees = 0.0)
         val observation = WindObservation(
             spotId = "spot-c",
             observedAt = Instant.parse("2026-01-01T00:00:00Z"),
@@ -79,7 +79,7 @@ class DeriveSailingMetricsUseCaseTest {
 
     @Test
     fun `returns null angle and point of sail when heading or wind direction is missing`() {
-        val inputMissingHeading = LiveMetrics(speedMps = 6.0, headingDegrees = null)
+        val inputMissingHeading = TelemetryReading(speedMps = 6.0, headingDegrees = null)
         val observationMissingDirection = WindObservation(
             spotId = "spot-d",
             observedAt = Instant.parse("2026-01-01T00:00:00Z"),
@@ -97,7 +97,7 @@ class DeriveSailingMetricsUseCaseTest {
 
     @Test
     fun `normalizes wrap around headings for exact angle`() {
-        val input = LiveMetrics(speedMps = 6.0, headingDegrees = 350.0)
+        val input = TelemetryReading(speedMps = 6.0, headingDegrees = 350.0)
         val observation = WindObservation(
             spotId = "spot-e",
             observedAt = Instant.parse("2026-01-01T00:00:00Z"),

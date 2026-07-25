@@ -1,8 +1,8 @@
 package com.tomheidenreich.zephyr.data.repository.fake
 
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.SessionState
-import com.tomheidenreich.zephyr.domain.model.SessionStatus
+import com.tomheidenreich.zephyr.domain.session.SessionState
+import com.tomheidenreich.zephyr.domain.session.SessionStatus
 import com.tomheidenreich.zephyr.domain.repository.ExerciseSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

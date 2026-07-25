@@ -1,6 +1,6 @@
 package com.tomheidenreich.zephyr.domain.repository
 
-import com.tomheidenreich.zephyr.domain.model.UserPreferences
+import com.tomheidenreich.zephyr.domain.preferences.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
 interface UserPreferencesRepository {

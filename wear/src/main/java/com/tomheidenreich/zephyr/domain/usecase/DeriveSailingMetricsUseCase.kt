@@ -1,10 +1,11 @@
 package com.tomheidenreich.zephyr.domain.usecase
 
-import com.tomheidenreich.zephyr.domain.model.LiveMetrics
-import com.tomheidenreich.zephyr.domain.model.PointOfSail
-import com.tomheidenreich.zephyr.domain.model.WindObservation
-import com.tomheidenreich.zephyr.domain.model.WindReference
-import com.tomheidenreich.zephyr.domain.model.WindSample
+import com.tomheidenreich.zephyr.domain.model.SailingMetrics
+import com.tomheidenreich.zephyr.domain.sailing.PointOfSail
+import com.tomheidenreich.zephyr.domain.model.TelemetryReading
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
+import com.tomheidenreich.zephyr.domain.wind.WindReference
+import com.tomheidenreich.zephyr.domain.wind.WindSample
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -18,28 +19,28 @@ import kotlin.math.sin
  */
 class DeriveSailingMetricsUseCase {
     operator fun invoke(
-        metrics: LiveMetrics,
+        telemetry: TelemetryReading,
         windObservation: WindObservation?,
-    ): LiveMetrics {
+    ): SailingMetrics {
         val observedTrueWind = windObservation?.trueWind
         val observedApparentWind = windObservation?.apparentWind
 
         val trueWind = observedTrueWind
             ?: calculateTrueWindFromApparent(
                 apparentWind = observedApparentWind,
-                speedMps = metrics.speedMps,
-                headingDegrees = metrics.headingDegrees,
+                speedMps = telemetry.speedMps,
+                headingDegrees = telemetry.headingDegrees,
             )
 
         val pointOfSailAngle = calculatePointOfSailAngle(
-            headingDegrees = metrics.headingDegrees,
+            headingDegrees = telemetry.headingDegrees,
             trueWindFromDegrees = trueWind?.directionFromDegrees,
         )
         val pointOfSail = pointOfSailAngle?.let(::classifyPointOfSail)
 
-        return metrics.copy(
+        return SailingMetrics(
             trueWind = trueWind,
-            apparentWind = observedApparentWind ?: metrics.apparentWind,
+            apparentWind = observedApparentWind,
             pointOfSailAngleDegrees = pointOfSailAngle,
             pointOfSail = pointOfSail,
         )

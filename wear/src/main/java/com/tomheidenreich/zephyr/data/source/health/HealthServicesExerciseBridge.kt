@@ -10,9 +10,9 @@ import androidx.health.services.client.data.ExerciseUpdate
 import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.Availability
 import androidx.health.services.client.data.ExerciseLapSummary
-import com.tomheidenreich.zephyr.domain.model.LiveMetrics
-import com.tomheidenreich.zephyr.domain.model.SessionState
-import com.tomheidenreich.zephyr.domain.model.SessionStatus
+import com.tomheidenreich.zephyr.domain.model.TelemetryReading
+import com.tomheidenreich.zephyr.domain.session.SessionState
+import com.tomheidenreich.zephyr.domain.session.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +26,7 @@ import androidx.health.services.client.startExercise
 class HealthServicesExerciseBridge(context: Context) {
     private val exerciseClient = HealthServices.getClient(context).exerciseClient
     private val sessionState = MutableStateFlow(SessionState())
-    private val liveMetrics = MutableStateFlow<LiveMetrics?>(null)
+    private val telemetry = MutableStateFlow<TelemetryReading?>(null)
 
     private val updateCallback = object : ExerciseUpdateCallback {
         override fun onRegistered() = Unit
@@ -49,11 +49,11 @@ class HealthServicesExerciseBridge(context: Context) {
             )
 
             if (mappedStatus.isTrackingState()) {
-                liveMetrics.value = liveMetrics.value.merge(update)
+                telemetry.value = telemetry.value.merge(update)
             }
 
             if (mappedStatus == SessionStatus.ENDED) {
-                liveMetrics.value = null
+                telemetry.value = null
             }
         }
 
@@ -71,7 +71,7 @@ class HealthServicesExerciseBridge(context: Context) {
 
     fun observeSessionState(): StateFlow<SessionState> = sessionState.asStateFlow()
 
-    fun observeLiveMetrics(): StateFlow<LiveMetrics?> = liveMetrics.asStateFlow()
+    fun observeTelemetry(): StateFlow<TelemetryReading?> = telemetry.asStateFlow()
 
     suspend fun startSession(sessionName: String?): SessionState {
         val startingState = SessionState(
@@ -132,7 +132,7 @@ class HealthServicesExerciseBridge(context: Context) {
                 endedAt = Instant.now(),
                 errorMessage = null,
             )
-            liveMetrics.value = null
+            telemetry.value = null
             sessionState.value
         } catch (throwable: Throwable) {
             sessionState.value = sessionState.value.copy(
@@ -143,17 +143,17 @@ class HealthServicesExerciseBridge(context: Context) {
         }
     }
 
-    fun clearMetrics() {
-        liveMetrics.value = null
+    fun clearTelemetry() {
+        telemetry.value = null
     }
 
-    private fun LiveMetrics?.merge(update: ExerciseUpdate): LiveMetrics {
+    private fun TelemetryReading?.merge(update: ExerciseUpdate): TelemetryReading {
         val metricsContainer = update.latestMetrics
         val heartRate = metricsContainer.getData(DataType.HEART_RATE_BPM).lastOrNull()?.value ?: this?.heartRateBpm
         val speed = metricsContainer.getData(DataType.SPEED).lastOrNull()?.value ?: this?.speedMps
         val distance = metricsContainer.getData(DataType.DISTANCE_TOTAL)?.total ?: this?.distanceMeters ?: 0.0
 
-        return (this ?: LiveMetrics()).copy(
+        return (this ?: TelemetryReading()).copy(
             timestamp = Instant.now(),
             heartRateBpm = heartRate,
             speedMps = speed,

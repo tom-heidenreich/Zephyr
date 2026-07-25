@@ -1,12 +1,12 @@
 package com.tomheidenreich.zephyr.data.repository.fake
 
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.WindDataSourceType
-import com.tomheidenreich.zephyr.domain.model.WindForecast
-import com.tomheidenreich.zephyr.domain.model.WindForecastEntry
-import com.tomheidenreich.zephyr.domain.model.WindReference
-import com.tomheidenreich.zephyr.domain.model.WindObservation
-import com.tomheidenreich.zephyr.domain.model.WindSample
+import com.tomheidenreich.zephyr.domain.wind.WindDataSourceType
+import com.tomheidenreich.zephyr.domain.wind.WindForecast
+import com.tomheidenreich.zephyr.domain.wind.WindForecastEntry
+import com.tomheidenreich.zephyr.domain.wind.WindReference
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
+import com.tomheidenreich.zephyr.domain.wind.WindSample
 import com.tomheidenreich.zephyr.domain.repository.WindRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,7 +1,7 @@
 package com.tomheidenreich.zephyr.domain.repository
 
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.SessionState
+import com.tomheidenreich.zephyr.domain.session.SessionState
 import kotlinx.coroutines.flow.Flow
 
 interface ExerciseSessionRepository {

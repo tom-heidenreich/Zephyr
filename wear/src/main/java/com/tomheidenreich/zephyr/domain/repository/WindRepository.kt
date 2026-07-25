@@ -1,8 +1,8 @@
 package com.tomheidenreich.zephyr.domain.repository
 
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.WindForecast
-import com.tomheidenreich.zephyr.domain.model.WindObservation
+import com.tomheidenreich.zephyr.domain.wind.WindForecast
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
 import kotlinx.coroutines.flow.Flow
 
 interface WindRepository {

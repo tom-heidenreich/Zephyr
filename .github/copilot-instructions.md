@@ -130,3 +130,53 @@ Use the following app structure when building an exercise app with Health Servic
 
 - Build the presentation layer using the Material 3 Design system
 - Adhere to Android and Material 3 Design Rules
+
+## Wear Data Model
+
+### Pipeline
+
+measure / observe -> derive -> presentation
+
+### Core Rules
+
+- Measurement models contain raw telemetry and device-produced facts.
+- Observation models contain external facts such as wind, forecast, and other environmental inputs.
+- Derived models contain computed domain state only.
+- Presentation models contain surface-specific projections only.
+- Repositories own source facts, not UI-ready state.
+- Use cases own derivation and projection.
+- Presentation must never depend on repository internals.
+
+### Source Facts
+
+- Examples: speed, heading, heart rate, distance, session lifecycle, wind observation, wind forecast, preferences.
+- Source facts should stay as close to the input stream as possible.
+- Source facts may be incomplete, stale, or partial.
+
+### Derived Data
+
+- Derived data is computed from one or more source facts.
+- Derived data must be deterministic and testable.
+- Derived data may be reused by multiple presentation projections.
+- Derived data must not include formatting or UI wording.
+
+### Presentation Projections
+
+- Each surface may define its own projection model.
+- App, tile, complication, and future surfaces may all need different fields.
+- Presentation projections may combine raw facts and derived facts, but only for that surface.
+- Presentation projections are allowed to be smaller than the underlying state.
+
+### Chaining Derivations
+
+- Chaining derivations is allowed.
+- A downstream derivation may consume an upstream derived model if that upstream model is stable, deterministic, and semantically a domain input.
+- Keep the dependency graph explicit and shallow when possible.
+- Do not chain through a presentation projection.
+- If a step is only formatting or surface-specific selection, it belongs in presentation, not another derivation.
+
+### Practical Preference
+
+- Prefer source facts -> shared derived state -> surface projection.
+- Use derived-from-derived only when it removes duplication or models a real semantic layer.
+- If a derived step is cheap and only needed by one surface, it can stay local to that surface’s projection use case.
