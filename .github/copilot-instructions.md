@@ -62,7 +62,8 @@ Use the following app structure when building an exercise app with Health Servic
 - Health Services API access only inside health data source classes.
 - Network client only inside wind remote data source.
 - Room DAOs only inside local data sources.
-- ViewModels, tile service, complication service only talk to use cases/repositories.
+- ViewModels, tile service, complication service only talk to use cases
+- Repositories must not be accessed by ViewModels directly, only through use cases
 
 ### Error and Offline Strategy
 
@@ -126,5 +127,6 @@ Use the following app structure when building an exercise app with Health Servic
 - Add battery-aware update policies and backoff rules.
 
 ## Presentation
+
 - Build the presentation layer using the Material 3 Design system
 - Adhere to Android and Material 3 Design Rules
