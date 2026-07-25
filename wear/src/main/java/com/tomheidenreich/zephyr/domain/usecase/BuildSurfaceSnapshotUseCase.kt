@@ -1,35 +1,33 @@
 package com.tomheidenreich.zephyr.domain.usecase
 
-import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.LiveMetrics
-import com.tomheidenreich.zephyr.domain.model.SessionState
-import com.tomheidenreich.zephyr.domain.model.SurfaceSnapshot
-import com.tomheidenreich.zephyr.domain.model.WindObservation
+import com.tomheidenreich.zephyr.domain.model.SailingMetrics
+import com.tomheidenreich.zephyr.domain.session.SessionState
+import com.tomheidenreich.zephyr.domain.surface.AppSurfaceSnapshot
+import com.tomheidenreich.zephyr.domain.model.TelemetryReading
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
 import java.time.Instant
 
 /**
- * Builds a compact snapshot suitable for app summary, tile, and complication surfaces.
+ * Builds an app-tailored snapshot for the main watch screen.
  */
 class BuildSurfaceSnapshotUseCase {
     operator fun invoke(
-        session: RepositoryResult<SessionState>,
-        metrics: RepositoryResult<LiveMetrics>,
-        wind: RepositoryResult<WindObservation>,
-    ): SurfaceSnapshot {
-        val sessionText = (session as? RepositoryResult.Data)?.value?.status?.name ?: "NO SESSION"
-        val metricValue = (metrics as? RepositoryResult.Data)?.value
-        val speedText = metricValue?.speedMps?.let { "${"%.1f".format(it)} m/s" } ?: "-- m/s"
-        val pointOfSailText = metricValue?.pointOfSail?.name?.replace('_', ' ') ?: "UNKNOWN"
-        val windText = metricValue?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
-            ?: (wind as? RepositoryResult.Data)?.value?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
+        session: SessionState,
+        telemetry: TelemetryReading?,
+        sailingMetrics: SailingMetrics?,
+        wind: WindObservation?,
+    ): AppSurfaceSnapshot {
+        val sessionText = session.status.name
+        val speedText = telemetry?.speedMps?.let { "${"%.1f".format(it)} m/s" } ?: "-- m/s"
+        val pointOfSailText = sailingMetrics?.pointOfSail?.name?.replace('_', ' ') ?: "UNKNOWN"
+        val windText = sailingMetrics?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
+            ?: wind?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
             ?: "-- kt TW"
 
-        return SurfaceSnapshot(
+        return AppSurfaceSnapshot(
             generatedAt = Instant.now(),
             headline = "$speedText | $windText",
             subline = "$pointOfSailText | $sessionText",
-            complicationShortText = pointOfSailText,
-            complicationContentDescription = "True wind $windText, point of sail $pointOfSailText, session $sessionText",
             isStale = false,
         )
     }

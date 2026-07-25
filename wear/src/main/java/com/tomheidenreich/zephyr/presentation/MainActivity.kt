@@ -44,15 +44,17 @@ import androidx.wear.compose.material3.lazy.transformedHeight
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
-import com.tomheidenreich.zephyr.domain.model.LiveMetrics
-import com.tomheidenreich.zephyr.domain.model.PointOfSail
-import com.tomheidenreich.zephyr.domain.model.SessionState
-import com.tomheidenreich.zephyr.domain.model.SurfaceSnapshot
-import com.tomheidenreich.zephyr.domain.model.WindObservation
-import com.tomheidenreich.zephyr.domain.model.SessionStatus
+import com.tomheidenreich.zephyr.domain.model.SailingMetrics
+import com.tomheidenreich.zephyr.domain.session.SessionState
+import com.tomheidenreich.zephyr.domain.surface.AppSurfaceSnapshot
+import com.tomheidenreich.zephyr.domain.model.TelemetryReading
+import com.tomheidenreich.zephyr.domain.wind.WindObservation
+import com.tomheidenreich.zephyr.domain.session.SessionStatus
 import com.tomheidenreich.zephyr.domain.usecase.BuildSurfaceSnapshotUseCase
-import com.tomheidenreich.zephyr.domain.usecase.DashboardUseCase
 import com.tomheidenreich.zephyr.domain.usecase.DeriveSailingMetricsUseCase
+import com.tomheidenreich.zephyr.domain.usecase.ExerciseSessionUseCase
+import com.tomheidenreich.zephyr.domain.usecase.TelemetryStreamUseCase
+import com.tomheidenreich.zephyr.domain.usecase.WindStreamUseCase
 import com.tomheidenreich.zephyr.presentation.theme.ZephyrTheme
 import com.tomheidenreich.zephyr.runtime.di.UseCaseGraph
 import kotlinx.coroutines.launch
@@ -74,7 +76,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun zephyrDashboard(
-    dashboardUseCase: DashboardUseCase = UseCaseGraph.dashboardUseCase,
+    exerciseSessionUseCase: ExerciseSessionUseCase = UseCaseGraph.exerciseSessionUseCase,
+    telemetryStreamUseCase: TelemetryStreamUseCase = UseCaseGraph.telemetryStreamUseCase,
+    windStreamUseCase: WindStreamUseCase = UseCaseGraph.windStreamUseCase,
     deriveSailingMetricsUseCase: DeriveSailingMetricsUseCase = UseCaseGraph.deriveSailingMetricsUseCase,
     buildSurfaceSnapshotUseCase: BuildSurfaceSnapshotUseCase = UseCaseGraph.buildSurfaceSnapshotUseCase,
 ) {
@@ -93,35 +97,36 @@ fun zephyrDashboard(
                 pendingStartRequest = false
                 if (shouldStart) {
                     coroutineScope.launch {
-                        dashboardUseCase.startSession()
+                        exerciseSessionUseCase.startSession()
                     }
                 }
             }
 
-            val sessionState = rememberCollectedState(dashboardUseCase.observeSessionState())
-            val liveMetricsState = rememberCollectedState(dashboardUseCase.observeLiveMetrics())
-            val windState = rememberCollectedState(remember { dashboardUseCase.observeCurrentWind(DEFAULT_SPOT_ID) })
-            val snapshotState = rememberCollectedState(dashboardUseCase.observeLatestSnapshot())
-
+            val sessionState = rememberCollectedState(exerciseSessionUseCase.observeSessionState())
+            val telemetryState = rememberCollectedState(telemetryStreamUseCase.observeTelemetry())
+            val windState = rememberCollectedState(remember { windStreamUseCase.observeCurrentWind(DEFAULT_SPOT_ID) })
             val sessionResult = sessionState.value ?: RepositoryResult.Loading
-            val liveMetricsResult = liveMetricsState.value ?: RepositoryResult.Loading
+            val telemetryResult = telemetryState.value ?: RepositoryResult.Loading
             val windResult = windState.value ?: RepositoryResult.Loading
 
             val session = sessionResult.dataOrNull() ?: SessionState()
-            val baseMetrics = liveMetricsResult.dataOrNull() ?: LiveMetrics()
+            val telemetry = telemetryResult.dataOrNull() ?: TelemetryReading()
             val windObservation = windResult.dataOrNull()
             val isTracking = session.status.isExerciseTracking()
-            val derivedMetrics = remember(baseMetrics, windObservation) {
+            val derivedMetrics = remember(telemetry, windObservation) {
                 deriveSailingMetricsUseCase(
-                    metrics = baseMetrics,
+                    telemetry = telemetry,
                     windObservation = windObservation,
                 )
             }
-            val snapshot = snapshotState.value ?: buildSurfaceSnapshotUseCase(
-                session = sessionResult,
-                metrics = RepositoryResult.Data(derivedMetrics),
-                wind = windResult,
-            )
+            val snapshot: AppSurfaceSnapshot = remember(session, telemetry, windObservation, derivedMetrics) {
+                buildSurfaceSnapshotUseCase(
+                    session = session,
+                    telemetry = telemetry,
+                    sailingMetrics = derivedMetrics,
+                    wind = windObservation,
+                )
+            }
             val primarySessionAction = session.status.primaryAction()
             val requiredPermissions = remember {
                 setOf(
@@ -146,7 +151,7 @@ fun zephyrDashboard(
                     SessionStatus.IDLE, SessionStatus.ENDED, SessionStatus.ERROR -> {
                         if (hasRequiredPermissions) {
                             coroutineScope.launch {
-                                dashboardUseCase.startSession()
+                                exerciseSessionUseCase.startSession()
                             }
                         } else {
                             pendingStartRequest = true
@@ -156,13 +161,13 @@ fun zephyrDashboard(
 
                     SessionStatus.STARTING, SessionStatus.ACTIVE -> {
                         coroutineScope.launch {
-                            dashboardUseCase.pauseSession()
+                            exerciseSessionUseCase.pauseSession()
                         }
                     }
 
                     SessionStatus.PAUSED -> {
                         coroutineScope.launch {
-                            dashboardUseCase.resumeSession()
+                            exerciseSessionUseCase.resumeSession()
                         }
                     }
                 }
@@ -230,7 +235,7 @@ fun zephyrDashboard(
                             onPrimaryAction = performPrimaryAction,
                             onEndAction = {
                                 coroutineScope.launch {
-                                    dashboardUseCase.endSession()
+                                    exerciseSessionUseCase.endSession()
                                 }
                             },
                         )
@@ -276,8 +281,8 @@ fun zephyrDashboard(
                         if (isTracking) {
                             metricCard(
                                 title = "Performance",
-                                primary = speedSummary(derivedMetrics),
-                                secondary = performanceSummary(derivedMetrics),
+                                primary = speedSummary(telemetry),
+                                secondary = performanceSummary(telemetry),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .transformedHeight(this, transformationSpec),
@@ -386,7 +391,7 @@ private fun sessionSummary(session: SessionState): String {
     }
 }
 
-private fun windSummary(metrics: LiveMetrics): String {
+private fun windSummary(metrics: SailingMetrics): String {
     val trueWind = metrics.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" } ?: "-- kt TW"
     val apparentWind = metrics.apparentWind?.speedKts?.let { "${"%.0f".format(it)} kt AW" } ?: "-- kt AW"
     return "$trueWind  ·  $apparentWind"
@@ -397,11 +402,11 @@ private fun windDetails(windObservation: WindObservation?): String {
     return "${windObservation.sourceType.name.prettyLabel()} via ${windObservation.source}"
 }
 
-private fun pointOfSailSummary(metrics: LiveMetrics): String {
+private fun pointOfSailSummary(metrics: SailingMetrics): String {
     return metrics.pointOfSail?.name?.prettyLabel() ?: "Unknown"
 }
 
-private fun exactAngleSummary(metrics: LiveMetrics): String {
+private fun exactAngleSummary(metrics: SailingMetrics): String {
     return metrics.pointOfSailAngleDegrees?.let { "${"%.0f".format(it)}° off the wind" } ?: "Angle unavailable"
 }
 
@@ -553,13 +558,13 @@ private fun lockedCard(
     }
 }
 
-private fun speedSummary(metrics: LiveMetrics): String {
+private fun speedSummary(metrics: TelemetryReading): String {
     val speed = metrics.speedMps?.let { "${"%.1f".format(it)} m/s" } ?: "-- m/s"
     val distance = "${"%.0f".format(metrics.distanceMeters)} m covered"
     return "$speed  ·  $distance"
 }
 
-private fun performanceSummary(metrics: LiveMetrics): String {
+private fun performanceSummary(metrics: TelemetryReading): String {
     return metrics.heartRateBpm?.let { "Heart rate ${"%.0f".format(it)} bpm" } ?: "Heart rate unavailable"
 }
 
