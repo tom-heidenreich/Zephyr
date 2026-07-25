@@ -109,8 +109,9 @@ fun zephyrDashboard(
             val telemetryResult = telemetryState.value ?: RepositoryResult.Loading
             val windResult = windState.value ?: RepositoryResult.Loading
 
+            val fallbackTelemetry = remember { TelemetryReading() }
             val session = sessionResult.dataOrNull() ?: SessionState()
-            val telemetry = telemetryResult.dataOrNull() ?: TelemetryReading()
+            val telemetry = telemetryResult.dataOrNull() ?: fallbackTelemetry
             val windObservation = windResult.dataOrNull()
             val isTracking = session.status.isExerciseTracking()
             val derivedMetrics = remember(telemetry, windObservation) {
