@@ -50,7 +50,7 @@ import com.tomheidenreich.zephyr.domain.surface.AppSurfaceSnapshot
 import com.tomheidenreich.zephyr.domain.model.TelemetryReading
 import com.tomheidenreich.zephyr.domain.wind.WindObservation
 import com.tomheidenreich.zephyr.domain.session.SessionStatus
-import com.tomheidenreich.zephyr.domain.usecase.BuildSurfaceSnapshotUseCase
+import com.tomheidenreich.zephyr.domain.usecase.BuildAppSurfaceSnapshotUseCase
 import com.tomheidenreich.zephyr.domain.usecase.DeriveSailingMetricsUseCase
 import com.tomheidenreich.zephyr.domain.usecase.ExerciseSessionUseCase
 import com.tomheidenreich.zephyr.domain.usecase.TelemetryStreamUseCase
@@ -80,7 +80,7 @@ fun zephyrDashboard(
     telemetryStreamUseCase: TelemetryStreamUseCase = UseCaseGraph.telemetryStreamUseCase,
     windStreamUseCase: WindStreamUseCase = UseCaseGraph.windStreamUseCase,
     deriveSailingMetricsUseCase: DeriveSailingMetricsUseCase = UseCaseGraph.deriveSailingMetricsUseCase,
-    buildSurfaceSnapshotUseCase: BuildSurfaceSnapshotUseCase = UseCaseGraph.buildSurfaceSnapshotUseCase,
+    buildSurfaceSnapshotUseCase: BuildAppSurfaceSnapshotUseCase = UseCaseGraph.buildSurfaceSnapshotUseCase,
 ) {
     ZephyrTheme {
         AppScaffold {

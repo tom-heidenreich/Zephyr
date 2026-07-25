@@ -10,7 +10,7 @@ import java.time.Instant
 /**
  * Builds an app-tailored snapshot for the main watch screen.
  */
-class BuildSurfaceSnapshotUseCase {
+class BuildAppSurfaceSnapshotUseCase {
     operator fun invoke(
         session: SessionState,
         telemetry: TelemetryReading?,

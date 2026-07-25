@@ -1,6 +1,6 @@
 package com.tomheidenreich.zephyr.runtime.di
 
-import com.tomheidenreich.zephyr.domain.usecase.BuildSurfaceSnapshotUseCase
+import com.tomheidenreich.zephyr.domain.usecase.BuildAppSurfaceSnapshotUseCase
 import com.tomheidenreich.zephyr.domain.usecase.DeriveSailingMetricsUseCase
 import com.tomheidenreich.zephyr.domain.usecase.ExerciseSessionUseCase
 import com.tomheidenreich.zephyr.domain.usecase.TelemetryStreamUseCase
@@ -26,5 +26,5 @@ object UseCaseGraph {
     }
 
     val deriveSailingMetricsUseCase: DeriveSailingMetricsUseCase by lazy { DeriveSailingMetricsUseCase() }
-    val buildSurfaceSnapshotUseCase: BuildSurfaceSnapshotUseCase by lazy { BuildSurfaceSnapshotUseCase() }
+    val buildSurfaceSnapshotUseCase: BuildAppSurfaceSnapshotUseCase by lazy { BuildAppSurfaceSnapshotUseCase() }
 }
