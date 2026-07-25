@@ -1,6 +1,6 @@
 package com.tomheidenreich.zephyr.data.source.health
 
-import com.tomheidenreich.zephyr.domain.model.SessionState
+import com.tomheidenreich.zephyr.domain.session.SessionState
 import kotlinx.coroutines.flow.Flow
 
 interface ExerciseSessionDataSource {

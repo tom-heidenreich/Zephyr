@@ -1,6 +1,6 @@
 package com.tomheidenreich.zephyr.domain.repository
 
-import com.tomheidenreich.zephyr.domain.model.SurfaceSnapshot
+import com.tomheidenreich.zephyr.domain.surface.SurfaceSnapshot
 import kotlinx.coroutines.flow.Flow
 
 interface SurfaceSnapshotRepository {

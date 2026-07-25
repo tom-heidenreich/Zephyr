@@ -1,4 +1,4 @@
-package com.tomheidenreich.zephyr.domain.model
+package com.tomheidenreich.zephyr.domain.session
 
 import java.time.Duration
 import java.time.Instant

@@ -2,7 +2,7 @@ package com.tomheidenreich.zephyr.data.repository.health
 
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
 import com.tomheidenreich.zephyr.data.source.health.HealthServicesExerciseBridge
-import com.tomheidenreich.zephyr.domain.model.SessionState
+import com.tomheidenreich.zephyr.domain.session.SessionState
 import com.tomheidenreich.zephyr.domain.repository.ExerciseSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
