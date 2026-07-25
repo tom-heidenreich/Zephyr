@@ -50,14 +50,10 @@ import com.tomheidenreich.zephyr.domain.model.SessionState
 import com.tomheidenreich.zephyr.domain.model.SurfaceSnapshot
 import com.tomheidenreich.zephyr.domain.model.WindObservation
 import com.tomheidenreich.zephyr.domain.model.SessionStatus
-import com.tomheidenreich.zephyr.domain.repository.ExerciseSessionRepository
-import com.tomheidenreich.zephyr.domain.repository.LiveMetricsRepository
-import com.tomheidenreich.zephyr.domain.repository.SurfaceSnapshotRepository
-import com.tomheidenreich.zephyr.domain.repository.WindRepository
 import com.tomheidenreich.zephyr.domain.usecase.BuildSurfaceSnapshotUseCase
+import com.tomheidenreich.zephyr.domain.usecase.DashboardUseCase
 import com.tomheidenreich.zephyr.domain.usecase.DeriveSailingMetricsUseCase
 import com.tomheidenreich.zephyr.presentation.theme.ZephyrTheme
-import com.tomheidenreich.zephyr.runtime.di.AppGraph
 import com.tomheidenreich.zephyr.runtime.di.UseCaseGraph
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
@@ -78,10 +74,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun zephyrDashboard(
-    exerciseSessionRepository: ExerciseSessionRepository = AppGraph.exerciseSessionRepository,
-    liveMetricsRepository: LiveMetricsRepository = AppGraph.liveMetricsRepository,
-    windRepository: WindRepository = AppGraph.windRepository,
-    surfaceSnapshotRepository: SurfaceSnapshotRepository = AppGraph.surfaceSnapshotRepository,
+    dashboardUseCase: DashboardUseCase = UseCaseGraph.dashboardUseCase,
     deriveSailingMetricsUseCase: DeriveSailingMetricsUseCase = UseCaseGraph.deriveSailingMetricsUseCase,
     buildSurfaceSnapshotUseCase: BuildSurfaceSnapshotUseCase = UseCaseGraph.buildSurfaceSnapshotUseCase,
 ) {
@@ -100,15 +93,15 @@ fun zephyrDashboard(
                 pendingStartRequest = false
                 if (shouldStart) {
                     coroutineScope.launch {
-                        exerciseSessionRepository.startSession()
+                        dashboardUseCase.startSession()
                     }
                 }
             }
 
-            val sessionState = rememberCollectedState(exerciseSessionRepository.observeSessionState())
-            val liveMetricsState = rememberCollectedState(liveMetricsRepository.observeLiveMetrics())
-            val windState = rememberCollectedState(remember { windRepository.observeCurrentWind(DEFAULT_SPOT_ID) })
-            val snapshotState = rememberCollectedState(surfaceSnapshotRepository.observeLatestSnapshot())
+            val sessionState = rememberCollectedState(dashboardUseCase.observeSessionState())
+            val liveMetricsState = rememberCollectedState(dashboardUseCase.observeLiveMetrics())
+            val windState = rememberCollectedState(remember { dashboardUseCase.observeCurrentWind(DEFAULT_SPOT_ID) })
+            val snapshotState = rememberCollectedState(dashboardUseCase.observeLatestSnapshot())
 
             val sessionResult = sessionState.value ?: RepositoryResult.Loading
             val liveMetricsResult = liveMetricsState.value ?: RepositoryResult.Loading
@@ -153,7 +146,7 @@ fun zephyrDashboard(
                     SessionStatus.IDLE, SessionStatus.ENDED, SessionStatus.ERROR -> {
                         if (hasRequiredPermissions) {
                             coroutineScope.launch {
-                                exerciseSessionRepository.startSession()
+                                dashboardUseCase.startSession()
                             }
                         } else {
                             pendingStartRequest = true
@@ -163,13 +156,13 @@ fun zephyrDashboard(
 
                     SessionStatus.STARTING, SessionStatus.ACTIVE -> {
                         coroutineScope.launch {
-                            exerciseSessionRepository.pauseSession()
+                            dashboardUseCase.pauseSession()
                         }
                     }
 
                     SessionStatus.PAUSED -> {
                         coroutineScope.launch {
-                            exerciseSessionRepository.resumeSession()
+                            dashboardUseCase.resumeSession()
                         }
                     }
                 }
@@ -237,7 +230,7 @@ fun zephyrDashboard(
                             onPrimaryAction = performPrimaryAction,
                             onEndAction = {
                                 coroutineScope.launch {
-                                    exerciseSessionRepository.endSession()
+                                    dashboardUseCase.endSession()
                                 }
                             },
                         )
