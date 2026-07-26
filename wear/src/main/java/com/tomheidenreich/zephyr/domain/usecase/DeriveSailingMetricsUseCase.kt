@@ -42,6 +42,7 @@ class DeriveSailingMetricsUseCase {
         val velocityMadeGoodMps = calculateVelocityMadeGood(
             vesselVelocity = telemetry.speedMps,
             headingDegrees = telemetry.headingDegrees,
+            trueWindFromDirectionDegrees = trueWind?.directionFromDegrees,
         )
         val velocityMadeGoodEfficiency = calculateVelocityMadeGoodEfficiency(
             velocityMadeGoodMps = velocityMadeGoodMps,
@@ -116,11 +117,16 @@ class DeriveSailingMetricsUseCase {
     private fun calculateVelocityMadeGood(
         vesselVelocity: Double?,
         headingDegrees: Double?,
+        trueWindFromDirectionDegrees: Int?,
     ): Double? {
         if (vesselVelocity == null) return null
         if (headingDegrees == null) return null
+        if (trueWindFromDirectionDegrees == null) return null
 
-        return vesselVelocity * cos(headingDegrees.toRadians())
+        val relativeHeading =
+            kotlin.math.abs(headingDegrees - trueWindFromDirectionDegrees.toDouble())
+
+        return vesselVelocity * kotlin.math.abs(cos(relativeHeading.normalizeDegrees().toRadians()))
     }
 
     /**
