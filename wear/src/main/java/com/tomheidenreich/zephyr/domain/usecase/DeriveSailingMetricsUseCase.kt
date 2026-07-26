@@ -54,7 +54,7 @@ class DeriveSailingMetricsUseCase {
             pointOfSailAngleDegrees = pointOfSailAngle,
             pointOfSail = pointOfSail,
             velocityMadeGoodMps = velocityMadeGoodMps,
-            velocityMadeGoodEfficiency = velocityMadeGoodEfficiency
+            velocityMadeGoodEfficiency = velocityMadeGoodEfficiency,
         )
     }
 
