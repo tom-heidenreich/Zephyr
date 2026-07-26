@@ -8,4 +8,6 @@ data class SailingMetrics(
     val apparentWind: WindSample? = null,
     val pointOfSailAngleDegrees: Double? = null,
     val pointOfSail: PointOfSail? = null,
+    val velocityMadeGoodMps: Double? = null,
+    val velocityMadeGoodEfficiency: Double? = null,
 )

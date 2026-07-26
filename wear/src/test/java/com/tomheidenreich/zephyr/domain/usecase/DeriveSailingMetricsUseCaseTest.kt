@@ -39,6 +39,53 @@ class DeriveSailingMetricsUseCaseTest {
     }
 
     @Test
+    fun `computes velocity made good and efficiency from vessel speed and true wind`() {
+        val input = TelemetryReading(speedMps = 10.0, headingDegrees = 60.0)
+        val observation = WindObservation(
+            spotId = "spot-vmg",
+            observedAt = Instant.parse("2026-01-01T00:00:00Z"),
+            trueWind = WindSample(speedKts = 20.0, directionFromDegrees = 300, reference = WindReference.TRUE),
+            apparentWind = null,
+            sourceType = WindDataSourceType.API,
+            source = "test",
+        )
+
+        val result = useCase(input, observation)
+
+        assertEquals(
+            5.0,
+            result.velocityMadeGoodMps ?: -1.0,
+            0.0001
+        )
+        assertEquals(0.485961123, result.velocityMadeGoodEfficiency ?: -1.0, 0.000000001)
+        assertEquals(120.0, result.pointOfSailAngleDegrees ?: -1.0, 0.0001)
+    }
+
+    @Test
+    fun `returns null velocity made good efficiency when true wind speed is zero`() {
+        val input = TelemetryReading(speedMps = 10.0, headingDegrees = 45.0)
+        val observation = WindObservation(
+            spotId = "spot-vmg-zero",
+            observedAt = Instant.parse("2026-01-01T00:00:00Z"),
+            trueWind = WindSample(speedKts = 0.0, directionFromDegrees = 270, reference = WindReference.TRUE),
+            apparentWind = null,
+            sourceType = WindDataSourceType.API,
+            source = "test",
+        )
+
+        val result = useCase(input, observation)
+
+        assertEquals(
+            7.071067812,
+            result.velocityMadeGoodMps ?: -1.0,
+            0.000000001
+        )
+        assertNull(
+            result.velocityMadeGoodEfficiency,
+        )
+    }
+
+    @Test
     fun `derives true wind from apparent wind and boat motion`() {
         val input = TelemetryReading(speedMps = 5.0, headingDegrees = 45.0)
         val observation = WindObservation(

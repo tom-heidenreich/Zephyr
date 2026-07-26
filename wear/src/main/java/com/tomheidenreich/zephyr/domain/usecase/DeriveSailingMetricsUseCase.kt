@@ -16,6 +16,7 @@ import kotlin.math.sin
  * Computes sailing-specific derived values:
  * 1) True wind when only apparent wind + vessel motion are known.
  * 2) Point of sail from vessel heading relative to true wind direction.
+ * 3) Velocity made good from vessel velocity and heading.
  */
 class DeriveSailingMetricsUseCase {
     operator fun invoke(
@@ -38,11 +39,23 @@ class DeriveSailingMetricsUseCase {
         )
         val pointOfSail = pointOfSailAngle?.let(::classifyPointOfSail)
 
+        val velocityMadeGoodMps = calculateVelocityMadeGood(
+            vesselVelocity = telemetry.speedMps,
+            headingDegrees = telemetry.headingDegrees,
+            trueWindFromDirectionDegrees = trueWind?.directionFromDegrees,
+        )
+        val velocityMadeGoodEfficiency = calculateVelocityMadeGoodEfficiency(
+            velocityMadeGoodMps = velocityMadeGoodMps,
+            trueWindSpeedKts = trueWind?.speedKts,
+        )
+
         return SailingMetrics(
             trueWind = trueWind,
             apparentWind = observedApparentWind,
             pointOfSailAngleDegrees = pointOfSailAngle,
             pointOfSail = pointOfSail,
+            velocityMadeGoodMps = velocityMadeGoodMps,
+            velocityMadeGoodEfficiency = velocityMadeGoodEfficiency,
         )
     }
 
@@ -99,6 +112,37 @@ class DeriveSailingMetricsUseCase {
             delta < 160.0 -> PointOfSail.BROAD_REACH
             else -> PointOfSail.RUNNING
         }
+    }
+
+    private fun calculateVelocityMadeGood(
+        vesselVelocity: Double?,
+        headingDegrees: Double?,
+        trueWindFromDirectionDegrees: Int?,
+    ): Double? {
+        if (vesselVelocity == null) return null
+        if (headingDegrees == null) return null
+        if (trueWindFromDirectionDegrees == null) return null
+
+        val relativeHeading =
+            kotlin.math.abs(headingDegrees - trueWindFromDirectionDegrees.toDouble())
+
+        return vesselVelocity * kotlin.math.abs(cos(relativeHeading.normalizeDegrees().toRadians()))
+    }
+
+    /**
+     * You would use a target VMG derived by maximum speed the vessel can achieve by design and wind conditions.
+     * Because this is hard to obtain, the efficieny is simplified, but with the cost of efficiency values 
+     * not really being comparable in different wind speeds.
+     */
+    private fun calculateVelocityMadeGoodEfficiency(
+        velocityMadeGoodMps: Double?,
+        trueWindSpeedKts: Double?,
+    ): Double? {
+        val velocityMadeGoodKts = velocityMadeGoodMps?.times(MPS_TO_KNOTS) ?: return null
+        val windSpeedKts = trueWindSpeedKts ?: return null
+        if (windSpeedKts <= 0.0) return null
+
+        return velocityMadeGoodKts / windSpeedKts
     }
 
     private fun angularDistance(a: Double, b: Double): Double {
