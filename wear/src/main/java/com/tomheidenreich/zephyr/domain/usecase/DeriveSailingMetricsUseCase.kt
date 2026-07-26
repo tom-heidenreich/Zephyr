@@ -138,6 +138,7 @@ class DeriveSailingMetricsUseCase {
         if (windSpeedKts <= 0.0) return null
 
         return velocityMadeGoodKts / windSpeedKts
+    }
 
     private fun angularDistance(a: Double, b: Double): Double {
         val diff = abs(a - b)
