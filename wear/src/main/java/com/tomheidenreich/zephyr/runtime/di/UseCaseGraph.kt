@@ -4,7 +4,7 @@ import com.tomheidenreich.zephyr.domain.usecase.BuildAppSurfaceSnapshotUseCase
 import com.tomheidenreich.zephyr.domain.usecase.DeriveSailingMetricsUseCase
 import com.tomheidenreich.zephyr.domain.usecase.ExerciseSessionUseCase
 import com.tomheidenreich.zephyr.domain.usecase.TelemetryStreamUseCase
-import com.tomheidenreich.zephyr.domain.usecase.WindStreamUseCase
+import com.tomheidenreich.zephyr.domain.usecase.WeatherStreamUseCase
 
 object UseCaseGraph {
     val exerciseSessionUseCase: ExerciseSessionUseCase by lazy {
@@ -19,9 +19,9 @@ object UseCaseGraph {
         )
     }
 
-    val windStreamUseCase: WindStreamUseCase by lazy {
-        WindStreamUseCase(
-            windRepository = AppGraph.windRepository,
+    val weatherStreamUseCase: WeatherStreamUseCase by lazy {
+        WeatherStreamUseCase(
+            weatherRepository = AppGraph.weatherRepository,
         )
     }
 

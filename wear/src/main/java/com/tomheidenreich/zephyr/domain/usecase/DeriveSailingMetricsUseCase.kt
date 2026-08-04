@@ -3,9 +3,9 @@ package com.tomheidenreich.zephyr.domain.usecase
 import com.tomheidenreich.zephyr.domain.model.SailingMetrics
 import com.tomheidenreich.zephyr.domain.sailing.PointOfSail
 import com.tomheidenreich.zephyr.domain.model.TelemetryReading
-import com.tomheidenreich.zephyr.domain.wind.WindObservation
 import com.tomheidenreich.zephyr.domain.wind.WindReference
 import com.tomheidenreich.zephyr.domain.wind.WindSample
+import com.tomheidenreich.zephyr.domain.weather.WeatherSnapshot
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -21,17 +21,15 @@ import kotlin.math.sin
 class DeriveSailingMetricsUseCase {
     operator fun invoke(
         telemetry: TelemetryReading,
-        windObservation: WindObservation?,
+        weather: WeatherSnapshot?,
     ): SailingMetrics {
-        val observedTrueWind = windObservation?.trueWind
-        val observedApparentWind = windObservation?.apparentWind
-
-        val trueWind = observedTrueWind
-            ?: calculateTrueWindFromApparent(
-                apparentWind = observedApparentWind,
-                speedMps = telemetry.speedMps,
-                headingDegrees = telemetry.headingDegrees,
+        val trueWind = weather?.windSpeedKts?.let { speedKts ->
+            WindSample(
+                speedKts = speedKts,
+                directionFromDegrees = weather.windDirectionDegrees,
+                reference = WindReference.TRUE,
             )
+        }
 
         val pointOfSailAngle = calculatePointOfSailAngle(
             headingDegrees = telemetry.headingDegrees,
@@ -51,45 +49,11 @@ class DeriveSailingMetricsUseCase {
 
         return SailingMetrics(
             trueWind = trueWind,
-            apparentWind = observedApparentWind,
+            apparentWind = null,
             pointOfSailAngleDegrees = pointOfSailAngle,
             pointOfSail = pointOfSail,
             velocityMadeGoodMps = velocityMadeGoodMps,
             velocityMadeGoodEfficiency = velocityMadeGoodEfficiency,
-        )
-    }
-
-    private fun calculateTrueWindFromApparent(
-        apparentWind: WindSample?,
-        speedMps: Double?,
-        headingDegrees: Double?,
-    ): WindSample? {
-        val apparent = apparentWind ?: return null
-        val heading = headingDegrees ?: return null
-        val directionFrom = apparent.directionFromDegrees ?: return null
-        val boatSpeedKts = speedMps?.times(MPS_TO_KNOTS) ?: return null
-
-        // Meteorological direction is "from"; vector math is easier in "toward" coordinates.
-        val apparentToward = (directionFrom + 180.0).normalizeDegrees()
-        val apparentEast = apparent.speedKts * sin(apparentToward.toRadians())
-        val apparentNorth = apparent.speedKts * cos(apparentToward.toRadians())
-
-        val headingToward = heading.normalizeDegrees()
-        val boatEast = boatSpeedKts * sin(headingToward.toRadians())
-        val boatNorth = boatSpeedKts * cos(headingToward.toRadians())
-
-        // Apparent wind equals true wind minus vessel velocity in ground frame.
-        val trueEast = apparentEast + boatEast
-        val trueNorth = apparentNorth + boatNorth
-
-        val trueSpeed = kotlin.math.sqrt((trueEast * trueEast) + (trueNorth * trueNorth))
-        val trueToward = atan2(trueEast, trueNorth).toDegrees().normalizeDegrees()
-        val trueFrom = (trueToward + 180.0).normalizeDegrees().roundToInt()
-
-        return WindSample(
-            speedKts = trueSpeed,
-            directionFromDegrees = trueFrom,
-            reference = WindReference.TRUE,
         )
     }
 
@@ -158,8 +122,4 @@ class DeriveSailingMetricsUseCase {
     private fun Double.toRadians(): Double = Math.toRadians(this)
 
     private fun Double.toDegrees(): Double = Math.toDegrees(this)
-
-    companion object {
-        private const val MPS_TO_KNOTS = 1.943844492
-    }
 }
