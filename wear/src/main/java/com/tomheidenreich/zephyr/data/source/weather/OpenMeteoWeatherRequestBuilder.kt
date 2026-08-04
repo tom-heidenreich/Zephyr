@@ -29,6 +29,7 @@ class OpenMeteoWeatherRequestBuilder {
             add("longitude=${location.longitude}")
             add("minutely_15=$hourlyVariables")
             add("forecast_minutely_15=16")
+            add("wind_speed_unit=kn")
             add("timezone=${encode(location.timezone)}")
             add("cell_selection=${location.cellSelection.toQueryValue()}")
         }.joinToString("&")
