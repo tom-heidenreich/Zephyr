@@ -52,7 +52,7 @@ internal object OpenMeteoWeatherResponseParser {
 
         return WeatherSnapshot(
             location = location,
-            observedAt = Instant.now(),
+            observedAt = observedAt,
             validFrom = observedAt,
             validUntil = observedAt.plusSeconds(15 * 60),
             sourceType = WeatherSourceType.FORECAST,
