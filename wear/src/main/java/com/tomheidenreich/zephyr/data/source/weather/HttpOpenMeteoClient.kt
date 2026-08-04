@@ -10,7 +10,9 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 class HttpOpenMeteoClient(
@@ -48,7 +50,7 @@ internal object OpenMeteoWeatherResponseParser {
 
         val time = firstStringArrayValue(weatherObject, "time")
             ?: throw IllegalStateException("Open-Meteo response missing minutely_15 time")
-        val observedAt = OffsetDateTime.parse(time + "Z").toInstant()
+        val observedAt = LocalDateTime.parse(time).atZone(ZoneId.systemDefault()).toInstant()
 
         return WeatherSnapshot(
             location = location,
