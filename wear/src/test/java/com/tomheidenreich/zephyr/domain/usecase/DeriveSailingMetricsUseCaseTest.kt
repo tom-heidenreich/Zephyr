@@ -28,7 +28,7 @@ class DeriveSailingMetricsUseCaseTest {
         assertEquals(WindReference.TRUE, result.trueWind?.reference)
         assertEquals(20.0, result.trueWind?.speedKts ?: -1.0, 0.0001)
         assertEquals(120.0, result.pointOfSailAngleDegrees ?: -1.0, 0.0001)
-        assertEquals(PointOfSail.BEAM_REACH, result.pointOfSail)
+        assertEquals(PointOfSail.BROAD_REACH, result.pointOfSail)
     }
 
     @Test
