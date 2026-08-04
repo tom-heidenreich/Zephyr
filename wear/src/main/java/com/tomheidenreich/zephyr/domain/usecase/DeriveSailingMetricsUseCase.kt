@@ -12,6 +12,8 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
+private const val MPS_TO_KNOTS = 1.9438444924406
+
 /**
  * Computes sailing-specific derived values:
  * 1) True wind when only apparent wind + vessel motion are known.
