@@ -3,6 +3,8 @@
 ![Mobile tests](https://github.com/tom-heidenreich/Zephyr/actions/workflows/mobile-tests.yml/badge.svg)
 ![Wear tests](https://github.com/tom-heidenreich/Zephyr/actions/workflows/wear-tests.yml/badge.svg)
 
+> This project is an experiment to see how far you can get with only vibe coding
+
 Zephyr is a sailing and windsurfing companion app built around a Wear OS watch experience. It helps a rider track an active session, derive sailing metrics from live data, and surface compact status views on the watch, tile, and complication.
 
 The app is designed for fast, glanceable use on the water:
