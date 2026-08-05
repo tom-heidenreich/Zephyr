@@ -132,6 +132,7 @@ fun zephyrDashboard(
                 setOf(
                     Manifest.permission.ACTIVITY_RECOGNITION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
                     HEART_RATE_PERMISSION,
                 )
             }

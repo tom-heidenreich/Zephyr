@@ -14,7 +14,9 @@ class HealthServicesTelemetryRepository(
     override fun observeTelemetry(): Flow<RepositoryResult<TelemetryReading>> {
         return bridge.observeTelemetry()
             .map { metrics -> metrics?.let { RepositoryResult.Data(it) } ?: RepositoryResult.Loading }
-            .catch { emit(RepositoryResult.Error(it)) }
+            .catch { throwable ->
+                emit(RepositoryResult.Error(throwable))
+            }
     }
 
     override suspend fun clearTelemetry() {
