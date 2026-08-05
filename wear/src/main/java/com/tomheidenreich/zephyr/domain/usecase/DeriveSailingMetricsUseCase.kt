@@ -33,6 +33,17 @@ class DeriveSailingMetricsUseCase {
             )
         }
 
+        val apparentWind = calculateApparentWind(
+            telemetry = telemetry,
+            trueWind = trueWind,
+        )
+        val apparentWindAngle = apparentWind?.directionFromDegrees?.let { apparentWindFromDegrees ->
+            calculatePointOfSailAngle(
+                headingDegrees = telemetry.headingDegrees,
+                trueWindFromDegrees = apparentWindFromDegrees,
+            )
+        }
+
         val pointOfSailAngle = calculatePointOfSailAngle(
             headingDegrees = telemetry.headingDegrees,
             trueWindFromDegrees = trueWind?.directionFromDegrees,
@@ -51,11 +62,46 @@ class DeriveSailingMetricsUseCase {
 
         return SailingMetrics(
             trueWind = trueWind,
-            apparentWind = null,
+            apparentWind = apparentWind,
+            apparentWindAngleDegrees = apparentWindAngle,
             pointOfSailAngleDegrees = pointOfSailAngle,
             pointOfSail = pointOfSail,
             velocityMadeGoodMps = velocityMadeGoodMps,
             velocityMadeGoodEfficiency = velocityMadeGoodEfficiency,
+        )
+    }
+
+    private fun calculateApparentWind(
+        telemetry: TelemetryReading,
+        trueWind: WindSample?,
+    ): WindSample? {
+        val trueWindSpeed = trueWind?.speedKts ?: return null
+        val trueWindFromDegrees = trueWind.directionFromDegrees ?: return null
+        val headingDegrees = telemetry.headingDegrees ?: return null
+        val vesselSpeedMps = telemetry.speedMps ?: return null
+
+        val vesselSpeedKts = vesselSpeedMps * MPS_TO_KNOTS
+        val trueAirMovement = vectorFromHeading(
+            headingDegrees = (trueWindFromDegrees + 180.0).normalizeDegrees(),
+            speed = trueWindSpeed,
+        )
+        val vesselMovement = vectorFromHeading(
+            headingDegrees = headingDegrees.normalizeDegrees(),
+            speed = vesselSpeedKts,
+        )
+
+        val apparentAirMovement = Vector2(
+            x = trueAirMovement.x - vesselMovement.x,
+            y = trueAirMovement.y - vesselMovement.y,
+        )
+        val apparentSpeedKts = apparentAirMovement.magnitude()
+        if (apparentSpeedKts <= 0.0) return null
+
+        val apparentFromDegrees = (vectorToHeading(apparentAirMovement) + 180.0).normalizeDegrees().roundToInt()
+        return WindSample(
+            speedKts = apparentSpeedKts,
+            directionFromDegrees = apparentFromDegrees,
+            reference = WindReference.APPARENT,
         )
     }
 
@@ -116,6 +162,18 @@ class DeriveSailingMetricsUseCase {
         return minOf(diff, 360.0 - diff)
     }
 
+    private fun vectorFromHeading(headingDegrees: Double, speed: Double): Vector2 {
+        val radians = headingDegrees.toRadians()
+        return Vector2(
+            x = speed * sin(radians),
+            y = speed * cos(radians),
+        )
+    }
+
+    private fun vectorToHeading(vector: Vector2): Double {
+        return Math.toDegrees(atan2(vector.x, vector.y)).normalizeDegrees()
+    }
+
     private fun Double.normalizeDegrees(): Double {
         val mod = this % 360.0
         return if (mod < 0) mod + 360.0 else mod
@@ -124,4 +182,11 @@ class DeriveSailingMetricsUseCase {
     private fun Double.toRadians(): Double = Math.toRadians(this)
 
     private fun Double.toDegrees(): Double = Math.toDegrees(this)
+
+    private data class Vector2(
+        val x: Double,
+        val y: Double,
+    ) {
+        fun magnitude(): Double = kotlin.math.sqrt((x * x) + (y * y))
+    }
 }

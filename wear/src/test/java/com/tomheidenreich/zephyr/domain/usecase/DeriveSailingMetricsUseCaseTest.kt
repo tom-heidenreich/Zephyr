@@ -48,6 +48,9 @@ class DeriveSailingMetricsUseCaseTest {
         )
         assertEquals(0.485961123, result.velocityMadeGoodEfficiency ?: -1.0, 0.000000001)
         assertEquals(120.0, result.pointOfSailAngleDegrees ?: -1.0, 0.0001)
+        assertEquals(19.7, result.apparentWind?.speedKts ?: -1.0, 0.1)
+        assertEquals(359, result.apparentWind?.directionFromDegrees)
+        assertEquals(61.0, result.apparentWindAngleDegrees ?: -1.0, 1.0)
     }
 
     @Test
@@ -90,6 +93,8 @@ class DeriveSailingMetricsUseCaseTest {
 
         assertNull(result.pointOfSailAngleDegrees)
         assertNull(result.pointOfSail)
+        assertNull(result.apparentWind)
+        assertNull(result.apparentWindAngleDegrees)
     }
 
     @Test
