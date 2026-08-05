@@ -4,7 +4,7 @@ import com.tomheidenreich.zephyr.domain.model.SailingMetrics
 import com.tomheidenreich.zephyr.domain.session.SessionState
 import com.tomheidenreich.zephyr.domain.surface.AppSurfaceSnapshot
 import com.tomheidenreich.zephyr.domain.model.TelemetryReading
-import com.tomheidenreich.zephyr.domain.wind.WindObservation
+import com.tomheidenreich.zephyr.domain.weather.WeatherSnapshot
 import java.time.Instant
 
 /**
@@ -15,13 +15,13 @@ class BuildAppSurfaceSnapshotUseCase {
         session: SessionState,
         telemetry: TelemetryReading?,
         sailingMetrics: SailingMetrics?,
-        wind: WindObservation?,
+        weather: WeatherSnapshot?,
     ): AppSurfaceSnapshot {
         val sessionText = session.status.name
         val speedText = telemetry?.speedMps?.let { "${"%.1f".format(it)} m/s" } ?: "-- m/s"
         val pointOfSailText = sailingMetrics?.pointOfSail?.name?.replace('_', ' ') ?: "UNKNOWN"
         val windText = sailingMetrics?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
-            ?: wind?.trueWind?.speedKts?.let { "${"%.0f".format(it)} kt TW" }
+            ?: weather?.windSpeedKts?.let { "${"%.0f".format(it)} kt TW" }
             ?: "-- kt TW"
 
         return AppSurfaceSnapshot(
