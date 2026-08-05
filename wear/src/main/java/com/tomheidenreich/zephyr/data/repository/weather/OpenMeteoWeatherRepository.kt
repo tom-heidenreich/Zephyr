@@ -57,7 +57,7 @@ class OpenMeteoWeatherRepository(
             if (location == null) {
                 val cached = state.value as? RepositoryResult.Data<WeatherSnapshot>
                 state.value = cached?.copy(freshness = DataFreshness.STALE)
-                    ?: RepositoryResult.Loading
+                    ?: RepositoryResult.Error(IllegalStateException("location unavailable"))
                 return
             }
 
