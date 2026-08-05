@@ -1,5 +1,6 @@
 package com.tomheidenreich.zephyr.data.repository.weather
 
+import android.util.Log
 import com.tomheidenreich.zephyr.core.result.DataFreshness
 import com.tomheidenreich.zephyr.core.result.RepositoryResult
 import com.tomheidenreich.zephyr.data.source.weather.OpenMeteoClient
@@ -25,6 +26,10 @@ class OpenMeteoWeatherRepository(
     private val state = MutableStateFlow<RepositoryResult<WeatherSnapshot>>(RepositoryResult.Loading)
     private val refreshMutex = Mutex()
 
+    private companion object {
+        const val TAG = "ZephyrWeatherRepo"
+    }
+
     override fun observeWeather(): Flow<RepositoryResult<WeatherSnapshot>> = flow {
         if (shouldRefresh()) {
             refresh(force = false)
@@ -43,11 +48,16 @@ class OpenMeteoWeatherRepository(
                 return
             }
 
-            val location = locationProvider.getCurrentLocation()
+            val location = try {
+                locationProvider.getCurrentLocation()
+            } catch (securityException: SecurityException) {
+                Log.d(TAG, "refresh() security exception while resolving location: ${securityException.message}")
+                null
+            }
             if (location == null) {
                 val cached = state.value as? RepositoryResult.Data<WeatherSnapshot>
                 state.value = cached?.copy(freshness = DataFreshness.STALE)
-                    ?: RepositoryResult.Error(IllegalStateException("Current location unavailable"))
+                    ?: RepositoryResult.Loading
                 return
             }
 
@@ -55,6 +65,7 @@ class OpenMeteoWeatherRepository(
                 val snapshot = client.fetchWeather(location)
                 state.value = RepositoryResult.Data(snapshot, DataFreshness.FRESH)
             } catch (throwable: Throwable) {
+                Log.d(TAG, "refresh() failed: ${throwable::class.simpleName}: ${throwable.message}")
                 val cached = state.value as? RepositoryResult.Data<WeatherSnapshot>
                 state.value = cached?.copy(freshness = DataFreshness.STALE)
                     ?: RepositoryResult.Error(throwable)
