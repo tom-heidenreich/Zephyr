@@ -2,10 +2,12 @@ package com.tomheidenreich.zephyr.runtime.di
 
 import android.content.Context
 import com.tomheidenreich.zephyr.data.repository.fake.FakeExerciseSessionRepository
+import com.tomheidenreich.zephyr.data.repository.fake.FakeHeadingRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeTelemetryRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeSurfaceSnapshotRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeUserPreferencesRepository
 import com.tomheidenreich.zephyr.data.repository.fake.FakeWeatherRepository
+import com.tomheidenreich.zephyr.data.repository.heading.AndroidHeadingRepository
 import com.tomheidenreich.zephyr.data.repository.weather.OpenMeteoWeatherRepository
 import com.tomheidenreich.zephyr.data.repository.health.HealthServicesExerciseSessionRepository
 import com.tomheidenreich.zephyr.data.repository.health.HealthServicesTelemetryRepository
@@ -13,6 +15,7 @@ import com.tomheidenreich.zephyr.data.source.health.HealthServicesExerciseBridge
 import com.tomheidenreich.zephyr.data.source.weather.AndroidCurrentPositionWeatherLocationProvider
 import com.tomheidenreich.zephyr.data.source.weather.HttpOpenMeteoClient
 import com.tomheidenreich.zephyr.domain.repository.ExerciseSessionRepository
+import com.tomheidenreich.zephyr.domain.repository.HeadingRepository
 import com.tomheidenreich.zephyr.domain.repository.TelemetryRepository
 import com.tomheidenreich.zephyr.domain.repository.SurfaceSnapshotRepository
 import com.tomheidenreich.zephyr.domain.repository.UserPreferencesRepository
@@ -23,6 +26,7 @@ import com.tomheidenreich.zephyr.domain.repository.WeatherRepository
  */
 object AppGraph {
     private val fakeExerciseSessionRepository = FakeExerciseSessionRepository()
+    private val fakeHeadingRepository = FakeHeadingRepository()
     private val fakeTelemetryRepository = FakeTelemetryRepository()
     private val fakeWeatherRepository = FakeWeatherRepository()
     private val fakeSurfaceSnapshotRepository = FakeSurfaceSnapshotRepository()
@@ -46,6 +50,11 @@ object AppGraph {
         HealthServicesTelemetryRepository(healthServicesBridge)
     }
 
+    private val androidHeadingRepository: HeadingRepository by lazy {
+        val context = requireNotNull(applicationContext)
+        AndroidHeadingRepository(context)
+    }
+
     private val openMeteoWeatherRepository: WeatherRepository by lazy {
         val context = requireNotNull(applicationContext)
         OpenMeteoWeatherRepository(
@@ -65,6 +74,9 @@ object AppGraph {
 
     val telemetryRepository: TelemetryRepository
         get() = if (healthServicesContext == null) fakeTelemetryRepository else healthServicesTelemetryRepository
+
+    val headingRepository: HeadingRepository
+        get() = applicationContext?.let { androidHeadingRepository } ?: fakeHeadingRepository
 
     val weatherRepository: WeatherRepository
         get() = applicationContext?.let { openMeteoWeatherRepository } ?: fakeWeatherRepository

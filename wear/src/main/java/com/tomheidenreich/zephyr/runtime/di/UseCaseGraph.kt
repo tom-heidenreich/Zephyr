@@ -16,6 +16,7 @@ object UseCaseGraph {
     val telemetryStreamUseCase: TelemetryStreamUseCase by lazy {
         TelemetryStreamUseCase(
             telemetryRepository = AppGraph.telemetryRepository,
+            headingRepository = AppGraph.headingRepository,
         )
     }
 

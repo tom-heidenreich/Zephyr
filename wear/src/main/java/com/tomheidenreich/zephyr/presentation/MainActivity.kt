@@ -101,9 +101,13 @@ fun zephyrDashboard(
                 }
             }
 
-            val sessionState = rememberCollectedState(exerciseSessionUseCase.observeSessionState())
-            val telemetryState = rememberCollectedState(telemetryStreamUseCase.observeTelemetry())
-            val weatherState = rememberCollectedState(remember { weatherStreamUseCase.observeWeather() })
+            val sessionFlow = remember { exerciseSessionUseCase.observeSessionState() }
+            val telemetryFlow = remember { telemetryStreamUseCase.observeTelemetry() }
+            val weatherFlow = remember { weatherStreamUseCase.observeWeather() }
+
+            val sessionState = rememberCollectedState(sessionFlow)
+            val telemetryState = rememberCollectedState(telemetryFlow)
+            val weatherState = rememberCollectedState(weatherFlow)
             val sessionResult = sessionState.value ?: RepositoryResult.Loading
             val telemetryResult = telemetryState.value ?: RepositoryResult.Loading
             val weatherResult = weatherState.value ?: RepositoryResult.Loading
